@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuoteHub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 2rem;
+      text-align: center;
+    }
+    .quote-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    button {
+      margin: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌟 QuoteHub</h1>
+
+  <div class="quote-box">
+    <p id="quote-text">Click below to get a quote!</p>
+    <p><em id="quote-author"></em></p>
+  </div>
+
+  <button onclick="getQuote()">🎲 Get Quote</button>
+
+  <h2>Submit Your Own Quote</h2>
+  <input type="text" id="new-quote" placeholder="Your quote" />
+  <input type="text" id="new-author" placeholder="Author" />
+  <button onclick="submitQuote()">➕ Add Quote</button>
+
+  <script>
+    const apiBase = 'yourApiKeyHere';
+  
+    async function getQuote() {
+      try {
+        const res = await fetch(`${apiBase}/get-quote`);
+        const data = await res.json();
+        document.getElementById("quote-text").innerText = `"${data.quote}"`;
+        document.getElementById("quote-author").innerText = `— ${data.author}`;
+  
+        // Show note if quote is from default
+        if (data.note) {
+          if (!document.getElementById("quote-note")) {
+            const noteElem = document.createElement("p");
+            noteElem.id = "quote-note";
+            noteElem.style.color = "gray";
+            noteElem.style.fontSize = "0.9rem";
+            document.querySelector(".quote-box").appendChild(noteElem);
+          }
+          document.getElementById("quote-note").innerText = data.note;
+        } else {
+          const noteElem = document.getElementById("quote-note");
+          if (noteElem) noteElem.remove(); // Remove note if not needed
+        }
+  
+      } catch (err) {
+        document.getElementById("quote-text").innerText = 'Failed to load quote.';
+        document.getElementById("quote-author").innerText = '';
+        console.error(err);
+      }
+    }
+  
+    async function submitQuote() {
+      const quote = document.getElementById("new-quote").value;
+      const author = document.getElementById("new-author").value;
+  
+      try {
+        const res = await fetch(`${apiBase}/add-quote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quote, author })
+        });
+  
+        if (res.ok) {
+          alert("Quote added successfully!");
+          document.getElementById("new-quote").value = '';
+          document.getElementById("new-author").value = '';
+        } else {
+          alert("Failed to add quote.");
+        }
+      } catch (err) {
+        alert("Error submitting quote.");
+        console.error(err);
+      }
+    }
+  </script>
+  
+</body>
+</html>
